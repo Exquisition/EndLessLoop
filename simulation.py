@@ -24,14 +24,25 @@ def write_params(handling):
     for i in range(7):
         radii = genfromtxt('Hackaton2019/track_' + str(i + 1) + '.csv', delimiter=',')
         v_max_h = find_v_max(radii[1:], handling)
-        info1 = pd.DataFrame({'radii': radii[1:]})
-        info1.to_excel('data/output.xlsx')
-        info2 = pd.DataFrame({'v_max_h': v_max_h})
-        info2.to_excel('data/output.xlsx')
-        info1.to_csv('data/track_{}_h_{}_v'.format(i+1, handling), encoding='utf-8', index=False)
-        info2.to_csv('data/track_{}_h_{}_radii'.format(i+1, handling), encoding='utf-8', index=False)
+        r = pd.DataFrame({'radii': radii[1:]})
+        r.to_excel('data/output.xlsx')
+        v = pd.DataFrame({'v_max_h': v_max_h})
+        v.to_excel('data/output.xlsx')
+        v.to_csv('data/track_{}_h_{}_v'.format(i+1, handling), encoding='utf-8', index=False)
+        v.to_csv('data/track_{}_h_{}_radii'.format(i+1, handling), encoding='utf-8', index=False)
 
-
+def find_acc(v_max, a_max):
+    acc = []
+    for i in range(len(v_max)):
+        num = min(5, len(v_max) - i - 1)
+        v_next = 0
+        for j in range(num):
+            v_next += v_max[i+j]
+        v_next = v_next/num
+        v_next = min(v_max[i], v_next)
+        a = (v_next**2 - (v_max[i])**2)/2
+        a = min(a, a_max)
+        acc.append(a)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameters for car')

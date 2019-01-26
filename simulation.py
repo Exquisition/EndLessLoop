@@ -4,55 +4,50 @@ import numpy as np
 from numpy import genfromtxt
 import math
 
-tracks = []
-max_speed = []
-for i in range(8):
-    track = genfromtxt('track_'+str(i+1)+'.csv', delimiter=',')
-    tracks.append(track[1:])
-    max_vel = []
-    for j in range(1000):
-        if track[j+1] >= 0:
-            max_vel.append(math.sqrt(track[j+1]*handling_coeff/1000000))
-        else:
-            max_vel.append(-1)
-    max_speed.append(np.array(max_vel))
-
-print(len(tracks[0]))
-print(max_speed[0])
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Parameters for car')
-    parser.add_argument('--acc', type=int,
-                        help='acceleration')
-    parser.add_argument('--break', type=int,
-                        help='breaking speed')
-    parser.add_argument('--speed', type=int,
-                        help='top speed')
-    parser.add_argument('--gas', type=int,
-                        help='gas capacity')
-    parser.add_argument('--tire', type=int,
-                        help='tire duration')
-    parser.add_argument('--handling', type=int,
-                        help='handling')
-    args = parser.parse_args()
 
 
 def find_v_max(radii, handling):
     v_max = []
-    for i in range(len(radii)):
+    for i in range(len(radii)-1):
         if(radii[i] == -1):
-            v_max.append(-1)
+            v_max.append(radii[i+1])
         else:
-            max = (radii[i] * handling/1000000)^1/2
-            v_max.append(max)
+            if(radii[i+1] == -1):
+                v_max.append(radii[i])
+            else:
+                v_max.append((min(radii[i], radii[i+1]) * handling/1000000)**(1/2))
+    return v_max
 
 
 
-def write_params():
-    radii = []
-    track_num = 1
+def write_params(handling):
     for i in range(7):
-        v_max_h = find_v_max()
-        radii_ = genfromtxt('/Hackaton2019/track_' + str(i + 1) + '.csv', delimiter=',')
-        info = pd.DataFrame({'radii': radii[1:] ,'v_max_h': [],
-                       'b': [3, 5, 6, 2, 4, 6, 7, 8, 7, 8, 9]})
+        radii = genfromtxt('Hackaton2019/track_' + str(i + 1) + '.csv', delimiter=',')
+        v_max_h = find_v_max(radii[1:], handling)
+        info1 = pd.DataFrame({'radii': radii[1:]})
+        info1.to_excel('data/output.xlsx')
+        info2 = pd.DataFrame({'v_max_h': v_max_h})
+        info2.to_excel('data/output.xlsx')
+        info1.to_csv('data/track_{}_h_{}_v'.format(i+1, handling), encoding='utf-8', index=False)
+        info2.to_csv('data/track_{}_h_{}_radii'.format(i+1, handling), encoding='utf-8', index=False)
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Parameters for car')
+    parser.add_argument('--acc', type=int, default=0,
+                        help='acceleration')
+    parser.add_argument('--break', type=int, default=0,
+                        help='breaking speed')
+    parser.add_argument('--speed', type=int, default=0,
+                        help='top speed')
+    parser.add_argument('--gas', type=int, default=0,
+                        help='gas capacity')
+    parser.add_argument('--tire', type=int, default=0,
+                        help='tire duration')
+    parser.add_argument('--handling', type=int, default=12,
+                        help='handling')
+    args = parser.parse_args()
+    write_params(args.handling)
+
+

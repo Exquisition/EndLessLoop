@@ -28,12 +28,10 @@ for cur_tier in range(5):
                 max_vel_temp.append(10000)
 
         for k in range(1000):
-            if k == 0:
-                max_vel.append(min(max_vel_temp[k], max_vel_temp[k+1]))
-            elif k == 999:
-                max_vel.append(min(max_vel_temp[k-1], max_vel_temp[k]))
+            if k == 999:
+                max_vel.append(max_vel_temp[k])
             else:
-                max_vel.append(min(max_vel_temp[k-1], max_vel_temp[k], max_vel_temp[k+1]))
+                max_vel.append(min(max_vel_temp[k], max_vel_temp[k+1]))
 
         max_speed.append(np.array(max_vel))
 
